@@ -3,20 +3,21 @@ BEGIN;
 
 -- Create products table
 CREATE TABLE IF NOT EXISTS products (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     slug VARCHAR(255) NOT NULL,
     name VARCHAR(500) NOT NULL,
     subtitle VARCHAR(1000),
     description TEXT,
     images JSONB DEFAULT '[]'::jsonb,
     details JSONB NOT NULL DEFAULT '{}'::jsonb,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 -- Create product_variants table
 CREATE TABLE IF NOT EXISTS product_variants (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id UUID NOT NULL,
     mass INTEGER NOT NULL,
     stock INTEGER NOT NULL DEFAULT 0,

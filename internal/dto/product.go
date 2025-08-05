@@ -5,7 +5,6 @@ type ProductCreateDTO struct {
     Name        string `json:"name"`
     Subtitle    string `json:"subtitle"`
     Description string `json:"description"`
-    Images      []string `json:"images"`
     Variants    []VariantCreateDTO `json:"variants"`
     Details     CaviarDetailsDTO `json:"details"`
 }
@@ -17,13 +16,13 @@ type VariantCreateDTO struct {
 }
 
 type MoneyDTO struct {
-    Amount   float64 `json:"amount"`
+    Amount   int `json:"amount"`
     Currency string `json:"currency"`
 }
 
 type CaviarDetailsDTO struct {
-    FishAge   string `json:"fish_age"`
-    GrainSize string `json:"grain_size"`
+    FishAge   string `json:"fishAge"`
+    GrainSize string `json:"grainSize"`
     Color     string `json:"color"`
     Taste     string `json:"taste"`
     Texture   string `json:"texture"`
@@ -38,4 +37,22 @@ type ShelfLifeDTO struct {
 type TemperatureRangeDTO struct {
     MinC float64 `json:"minC"`
     MaxC float64 `json:"maxC"`
+}
+
+type ProductUpdateDTO struct {
+    ID          string `json:"id"`
+    Slug        string `json:"slug,omitempty"`
+    Name        string `json:"name,omitempty"`
+    Subtitle    string `json:"subtitle,omitempty"`
+    Description string `json:"description,omitempty"`
+    Images      []string `json:"images,omitempty"`
+    Variants    []VariantUpdateDTO `json:"variants,omitempty"`
+    Details     *CaviarDetailsDTO `json:"details,omitempty"`
+}
+
+type VariantUpdateDTO struct {
+    ID     string `json:"id,omitempty"`
+    Mass   int    `json:"mass,omitempty"`
+    Stock  int    `json:"stock,omitempty"`
+    Prices map[string]MoneyDTO `json:"prices,omitempty"`
 }

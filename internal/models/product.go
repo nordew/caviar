@@ -1,45 +1,60 @@
 package models
 
 import (
+	"strconv"
 	"time"
 
 	"caviar/internal/dto"
 	"caviar/pkg/apperror"
+
+	"github.com/google/uuid"
 )
 
 type Product struct {
-    ID          string        `db:"id"`          
-    Slug        string        `db:"slug"`        
-    Name        string        `db:"name"`        
-    Subtitle    string        `db:"subtitle"`    
-    Description string        `db:"description"`
-    Images      []string      `db:"images"`      
-    Variants    []Variant                     
-    Details     CaviarDetails `db:"details"`     
-    CreatedAt   time.Time     `db:"created_at"`
-    UpdatedAt   time.Time     `db:"updated_at"`
+    ID          string        `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
+    Slug        string        `gorm:"uniqueIndex;not null"`
+    Name        string        `gorm:"not null"`
+    Subtitle    string        `gorm:"not null"`
+    Description string        `gorm:"type:text"`
+    Variants    []Variant     `gorm:"foreignKey:ProductID;constraint:OnDelete:CASCADE"`
+    Details     CaviarDetails `gorm:"type:jsonb;not null;default:'{}'::jsonb"`
+    IsActive    bool          `gorm:"default:true"`
+    CreatedAt   time.Time     `gorm:"not null;default:now()"`
+    UpdatedAt   time.Time     `gorm:"not null;default:now()"`
+}
+
+func (Product) TableName() string {
+    return "products"
 }
 
 type Variant struct {
-    ID        string            `db:"id"`
-    ProductID string            `db:"product_id"`
-    Mass      int              `db:"mass"`
-    Stock     int              `db:"stock"`
-    Prices    map[string]Money
+    ID        string    `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
+    ProductID string    `gorm:"type:uuid;not null"`
+    Mass      int       `gorm:"not null"`
+    Stock     int       `gorm:"not null;default:0"`
+    Prices    MoneyMap  `gorm:"type:jsonb;not null;default:'{}'::jsonb"`
+    CreatedAt time.Time `gorm:"not null;default:now()"`
+    UpdatedAt time.Time `gorm:"not null;default:now()"`
+}
+
+func (Variant) TableName() string {
+    return "product_variants"
 }
 
 type Money struct {
-    Amount   float64 
+    Amount   int 
     Currency string 
 }
 
+type MoneyMap map[string]Money
+
 type CaviarDetails struct {
-    FishAge   string        `db:"fish_age"`   
-    GrainSize string        `db:"grain_size"` 
-    Color     string        `db:"color"`      
-    Taste     string        `db:"taste"`      
-    Texture   string        `db:"texture"`    
-    ShelfLife ShelfLife     `db:"shelf_life"`
+    FishAge   string 
+    GrainSize string 
+    Color     string 
+    Taste     string 
+    Texture   string 
+    ShelfLife ShelfLife 
 }
 
 type ShelfLife struct {
@@ -53,7 +68,8 @@ type TemperatureRange struct {
 }
 
 func NewProduct(input dto.ProductCreateDTO) (*Product, error) {
-    // required string fields
+    now := time.Now()
+
     if input.Slug == "" {
         return nil, apperror.New(apperror.CodeInvalidInput, "slug is required")
     }
@@ -63,26 +79,21 @@ func NewProduct(input dto.ProductCreateDTO) (*Product, error) {
     if input.Subtitle == "" {
         return nil, apperror.New(apperror.CodeInvalidInput, "subtitle is required")
     }
-    // at least one image
-    if len(input.Images) == 0 {
-        return nil, apperror.New(apperror.CodeInvalidInput, "at least one image is required")
-    }
-    // variants
     if len(input.Variants) == 0 {
         return nil, apperror.New(apperror.CodeInvalidInput, "at least one variant is required")
     }
     var variants []Variant
     for i, v := range input.Variants {
         if v.Mass <= 0 {
-            return nil, apperror.New(apperror.CodeInvalidInput, "variant mass must be > 0 (index " + string(i) + ")")
+            return nil, apperror.New(apperror.CodeInvalidInput, "variant mass must be > 0 (index " + strconv.Itoa(i) + ")")
         }
         if v.Stock < 0 {
-            return nil, apperror.New(apperror.CodeInvalidInput, "variant stock cannot be negative (index " + string(i) + ")")
+            return nil, apperror.New(apperror.CodeInvalidInput, "variant stock cannot be negative (index " + strconv.Itoa(i) + ")")
         }
         if len(v.Prices) == 0 {
-            return nil, apperror.New(apperror.CodeInvalidInput, "variant must have at least one price (index " + string(i) + ")")
+            return nil, apperror.New(apperror.CodeInvalidInput, "variant must have at least one price (index " + strconv.Itoa(i) + ")")
         }
-        m := make(map[string]Money, len(v.Prices))
+        m := make(MoneyMap, len(v.Prices))
         for region, p := range v.Prices {
             if p.Amount <= 0 {
                 return nil, apperror.New(apperror.CodeInvalidInput, "price amount must be > 0 for region " + region)
@@ -96,12 +107,14 @@ func NewProduct(input dto.ProductCreateDTO) (*Product, error) {
             }
         }
         variants = append(variants, Variant{
-            Mass:   v.Mass,
-            Stock:  v.Stock,
-            Prices: m,
+            ID:        uuid.New().String(),
+            Mass:      v.Mass,
+            Stock:     v.Stock,
+            Prices:    m,
+            CreatedAt: now,
+            UpdatedAt: now,
         })
     }
-    // details
     d := input.Details
     if d.FishAge == "" {
         return nil, apperror.New(apperror.CodeInvalidInput, "fish age is required in details")
@@ -122,16 +135,12 @@ func NewProduct(input dto.ProductCreateDTO) (*Product, error) {
     if sl.Duration == "" {
         return nil, apperror.New(apperror.CodeInvalidInput, "shelf life duration is required")
     }
-    // temperature range: no further checks here, but you could enforce MinC < MaxC
-
-    // assemble Product
-    now := time.Now().UTC()
     prod := &Product{
+        ID:          uuid.New().String(),
         Slug:        input.Slug,
         Name:        input.Name,
         Subtitle:    input.Subtitle,
         Description: input.Description,
-        Images:      input.Images,
         Variants:    variants,
         Details: CaviarDetails{
             FishAge:   d.FishAge,
@@ -147,6 +156,7 @@ func NewProduct(input dto.ProductCreateDTO) (*Product, error) {
                 },
             },
         },
+        IsActive:  false,
         CreatedAt: now,
         UpdatedAt: now,
     }

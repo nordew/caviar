@@ -12,6 +12,12 @@ type Config struct {
 	Logger          Logger          `envPrefix:"LOGGER_"`
 	HTTP            HTTP            `envPrefix:"HTTP_"`
 	RateLimiter     RateLimiter     `envPrefix:"RATE_LIMITER_"`
+	Auth Auth `envPrefix:"AUTH_"`
+	IsProd bool `env:"IS_PROD" envDefault:"false"`
+}
+
+type Auth struct {
+	Secret string `env:"SECRET,required"`
 }
 
 type Postgres struct {

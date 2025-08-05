@@ -8,7 +8,6 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     telegram_id VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
@@ -26,11 +25,6 @@ ALTER TABLE users
 ADD CONSTRAINT chk_users_telegram_id_not_empty 
 CHECK (LENGTH(TRIM(telegram_id)) > 0);
 
-ALTER TABLE users 
-ADD CONSTRAINT chk_users_password_not_empty 
-CHECK (LENGTH(TRIM(password)) > 0);
-
--- Create trigger for updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN

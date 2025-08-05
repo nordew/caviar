@@ -3,7 +3,6 @@ package pgsql
 import (
 	"caviar/internal/config"
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -22,12 +21,10 @@ const (
 	defaultConnMaxLifetime = time.Hour
 )
 
-type DB struct {
-	*gorm.DB
-	sqlDB *sql.DB
-}
-
-func New(ctx context.Context, cfg config.Postgres, models ...interface{}) (*DB, error) {
+func New(
+	ctx context.Context, 
+	cfg config.Postgres, 
+	models ...any) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=UTC",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName,
@@ -68,21 +65,11 @@ func New(ctx context.Context, cfg config.Postgres, models ...interface{}) (*DB, 
 
 	db = db.WithContext(ctx)
 
-	wrapper := &DB{DB: db, sqlDB: sqlDB}
-
 	if cfg.Migrate && len(models) > 0 {
-		if err := wrapper.Migrate(models...); err != nil {
+		if err := db.AutoMigrate(models...); err != nil {
 			return nil, errors.Wrap(err, "auto migration failed")
 		}
 	}
 
-	return wrapper, nil
-}
-
-func (d *DB) Close() error {
-	return d.sqlDB.Close()
-}
-
-func (d *DB) Migrate(models ...interface{}) error {
-	return d.DB.AutoMigrate(models...)
+	return db, nil
 }
