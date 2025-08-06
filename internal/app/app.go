@@ -6,6 +6,7 @@ import (
 	"caviar/internal/service"
 	"caviar/internal/storage"
 	"caviar/pkg/db/pgsql"
+	"caviar/pkg/telegram"
 	"context"
 	"log"
 
@@ -39,15 +40,31 @@ func MustRun(ctx context.Context) {
 		log.Fatalf("Failed to connect to minio: %v", err)
 	}
 
+	userStorage := storage.NewUserStorage(gormClient)
+
 	productStorage := storage.NewProductStorage(gormClient)
 	productService := service.NewProductService(productStorage, minioClient, logger)
 
+	telegramService, err := telegram.NewService(cfg.Telegram.Token, userStorage, logger)
+	if err != nil {
+		log.Fatalf("Failed to create telegram service: %v", err)
+	}
+
+	// Create notification service
+	notificationService := service.NewNotificationService(userStorage, telegramService, logger)
+
+	orderStorage := storage.NewOrderStorage(gormClient)
+	orderService := service.NewOrderService(orderStorage, productStorage, notificationService, logger)
+
 	handler := rest.NewHandler(
 		cfg.Server.Port, 
-		cfg.Auth.Secret, 
 		productService,
+		orderService,
+		logger,
 		cfg.IsProd,
 	)
+
+	go telegramService.Start(ctx)
 	
 	handler.RegisterAndRun(gin.Default())
 }

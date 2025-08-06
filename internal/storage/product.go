@@ -45,7 +45,8 @@ func (s *productStorage) GetByID(ctx context.Context, id string) (*models.Produc
     err := s.db.
         WithContext(ctx).
         Preload("Variants").
-        First(&p, id).
+        Where("id = ?", id).
+        First(&p).
         Error
 
     if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -253,5 +254,38 @@ func (s *productStorage) Delete(ctx context.Context, id string) error {
             fmt.Sprintf("product %s not found", id),
         )
     }
+    return nil
+}
+
+func (s *productStorage) GetVariantByID(ctx context.Context, productID, variantID string) (*models.Variant, error) {
+    var variant models.Variant
+    err := s.db.WithContext(ctx).
+        Where("id = ? AND product_id = ?", variantID, productID).
+        First(&variant).Error
+
+    if errors.Is(err, gorm.ErrRecordNotFound) {
+        return nil, apperror.New(apperror.CodeNotFound, "variant not found")
+    }
+    if err != nil {
+        return nil, apperror.Wrap(err, apperror.CodeInternal, "failed to get variant")
+    }
+
+    return &variant, nil
+}
+
+func (s *productStorage) UpdateVariantStock(ctx context.Context, variantID string, stockChange int) error {
+    result := s.db.WithContext(ctx).
+        Model(&models.Variant{}).
+        Where("id = ?", variantID).
+        Update("stock", gorm.Expr("stock + ?", stockChange))
+
+    if result.Error != nil {
+        return apperror.Wrap(result.Error, apperror.CodeInternal, "failed to update variant stock")
+    }
+
+    if result.RowsAffected == 0 {
+        return apperror.New(apperror.CodeNotFound, "variant not found")
+    }
+
     return nil
 }

@@ -13,6 +13,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.6
 	go.uber.org/zap v1.27.0
+	gopkg.in/telebot.v4 v4.0.0-beta.5
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.30.1
 )

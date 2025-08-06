@@ -12,12 +12,8 @@ type Config struct {
 	Logger          Logger          `envPrefix:"LOGGER_"`
 	HTTP            HTTP            `envPrefix:"HTTP_"`
 	RateLimiter     RateLimiter     `envPrefix:"RATE_LIMITER_"`
-	Auth Auth `envPrefix:"AUTH_"`
-	IsProd bool `env:"IS_PROD" envDefault:"false"`
-}
-
-type Auth struct {
-	Secret string `env:"SECRET,required"`
+	Telegram        Telegram        `envPrefix:"TELEGRAM_"`
+	IsProd          bool            `env:"IS_PROD" envDefault:"false"`
 }
 
 type Postgres struct {
@@ -63,4 +59,8 @@ type Minio struct {
 	SecretAccessKey string `env:"SECRET_ACCESS_KEY,required"`
 	BucketName      string `env:"BUCKET_NAME,required"`
 	UseSSL          bool   `env:"USE_SSL" envDefault:"false"`
+}
+
+type Telegram struct {
+	Token string `env:"TOKEN,required"`
 }

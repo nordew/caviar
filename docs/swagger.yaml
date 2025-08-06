@@ -1,0 +1,832 @@
+basePath: /
+definitions:
+  caviar_internal_dto.CaviarDetailsDTO:
+    properties:
+      color:
+        type: string
+      fishAge:
+        type: string
+      grainSize:
+        type: string
+      shelfLife:
+        $ref: '#/definitions/caviar_internal_dto.ShelfLifeDTO'
+      taste:
+        type: string
+      texture:
+        type: string
+    type: object
+  caviar_internal_dto.CustomerInfoDTO:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      fullName:
+        type: string
+      lastName:
+        type: string
+      phone:
+        type: string
+    required:
+    - phone
+    type: object
+  caviar_internal_dto.DeliveryInfoDTO:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      country:
+        type: string
+      instructions:
+        type: string
+      postOffice:
+        type: string
+      type:
+        enum:
+        - post_office
+        - courier
+        - address
+        type: string
+    required:
+    - city
+    - country
+    - type
+    type: object
+  caviar_internal_dto.MoneyDTO:
+    properties:
+      amount:
+        type: integer
+      currency:
+        type: string
+    type: object
+  caviar_internal_dto.OrderCreateDTO:
+    properties:
+      customerInfo:
+        $ref: '#/definitions/caviar_internal_dto.CustomerInfoDTO'
+      deliveryInfo:
+        $ref: '#/definitions/caviar_internal_dto.DeliveryInfoDTO'
+      items:
+        items:
+          $ref: '#/definitions/caviar_internal_dto.OrderItemDTO'
+        minItems: 1
+        type: array
+      notes:
+        type: string
+    required:
+    - customerInfo
+    - deliveryInfo
+    - items
+    type: object
+  caviar_internal_dto.OrderItemDTO:
+    properties:
+      productId:
+        type: string
+      quantity:
+        minimum: 1
+        type: integer
+      unitPrice:
+        $ref: '#/definitions/caviar_internal_dto.MoneyDTO'
+      variantId:
+        type: string
+    required:
+    - productId
+    - quantity
+    - unitPrice
+    - variantId
+    type: object
+  caviar_internal_dto.OrderItemResponseDTO:
+    properties:
+      id:
+        type: string
+      product:
+        $ref: '#/definitions/caviar_internal_dto.ProductResponseDTO'
+      productId:
+        type: string
+      quantity:
+        type: integer
+      totalPrice:
+        $ref: '#/definitions/caviar_internal_dto.MoneyDTO'
+      unitPrice:
+        $ref: '#/definitions/caviar_internal_dto.MoneyDTO'
+      variantId:
+        type: string
+    type: object
+  caviar_internal_dto.OrderListResponseDTO:
+    properties:
+      limit:
+        type: integer
+      orders:
+        items:
+          $ref: '#/definitions/caviar_internal_dto.OrderResponseDTO'
+        type: array
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  caviar_internal_dto.OrderResponseDTO:
+    properties:
+      createdAt:
+        type: string
+      customerInfo:
+        $ref: '#/definitions/caviar_internal_dto.CustomerInfoDTO'
+      deliveryInfo:
+        $ref: '#/definitions/caviar_internal_dto.DeliveryInfoDTO'
+      id:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/caviar_internal_dto.OrderItemResponseDTO'
+        type: array
+      notes:
+        type: string
+      orderNumber:
+        type: string
+      status:
+        type: string
+      totalAmount:
+        $ref: '#/definitions/caviar_internal_dto.MoneyDTO'
+      updatedAt:
+        type: string
+    type: object
+  caviar_internal_dto.OrderStatusUpdateDTO:
+    properties:
+      status:
+        enum:
+        - pending
+        - confirmed
+        - processing
+        - shipped
+        - delivered
+        - cancelled
+        type: string
+    required:
+    - status
+    type: object
+  caviar_internal_dto.ProductCreateDTO:
+    properties:
+      description:
+        type: string
+      details:
+        $ref: '#/definitions/caviar_internal_dto.CaviarDetailsDTO'
+      name:
+        type: string
+      slug:
+        type: string
+      subtitle:
+        type: string
+      variants:
+        items:
+          $ref: '#/definitions/caviar_internal_dto.VariantCreateDTO'
+        type: array
+    type: object
+  caviar_internal_dto.ProductResponseDTO:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      details:
+        $ref: '#/definitions/caviar_internal_dto.CaviarDetailsDTO'
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      slug:
+        type: string
+      subtitle:
+        type: string
+      updated_at:
+        type: string
+      variants:
+        items:
+          $ref: '#/definitions/caviar_internal_dto.VariantResponseDTO'
+        type: array
+    type: object
+  caviar_internal_dto.ProductUpdateDTO:
+    properties:
+      description:
+        type: string
+      details:
+        $ref: '#/definitions/caviar_internal_dto.CaviarDetailsDTO'
+      id:
+        type: string
+      images:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      slug:
+        type: string
+      subtitle:
+        type: string
+      variants:
+        items:
+          $ref: '#/definitions/caviar_internal_dto.VariantUpdateDTO'
+        type: array
+    type: object
+  caviar_internal_dto.RegionalCustomerInfoDTO:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      fullName:
+        type: string
+      lastName:
+        type: string
+      phone:
+        type: string
+    required:
+    - phone
+    type: object
+  caviar_internal_dto.RegionalDeliveryInfoDTO:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      country:
+        type: string
+      instructions:
+        type: string
+      post_office:
+        type: string
+      type:
+        type: string
+    required:
+    - city
+    - country
+    - type
+    type: object
+  caviar_internal_dto.RegionalOrderDTO:
+    properties:
+      customerInfo:
+        $ref: '#/definitions/caviar_internal_dto.RegionalCustomerInfoDTO'
+      deliveryInfo:
+        $ref: '#/definitions/caviar_internal_dto.RegionalDeliveryInfoDTO'
+      items:
+        items:
+          $ref: '#/definitions/caviar_internal_dto.OrderItemDTO'
+        minItems: 1
+        type: array
+      notes:
+        type: string
+    required:
+    - customerInfo
+    - deliveryInfo
+    - items
+    type: object
+  caviar_internal_dto.ShelfLifeDTO:
+    properties:
+      duration:
+        type: string
+      tempRange:
+        $ref: '#/definitions/caviar_internal_dto.TemperatureRangeDTO'
+    type: object
+  caviar_internal_dto.TemperatureRangeDTO:
+    properties:
+      maxC:
+        type: number
+      minC:
+        type: number
+    type: object
+  caviar_internal_dto.VariantCreateDTO:
+    properties:
+      mass:
+        type: integer
+      prices:
+        additionalProperties:
+          $ref: '#/definitions/caviar_internal_dto.MoneyDTO'
+        type: object
+      stock:
+        type: integer
+    type: object
+  caviar_internal_dto.VariantResponseDTO:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      mass:
+        type: integer
+      prices:
+        additionalProperties:
+          $ref: '#/definitions/caviar_internal_dto.MoneyDTO'
+        type: object
+      stock:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  caviar_internal_dto.VariantUpdateDTO:
+    properties:
+      id:
+        type: string
+      mass:
+        type: integer
+      prices:
+        additionalProperties:
+          $ref: '#/definitions/caviar_internal_dto.MoneyDTO'
+        type: object
+      stock:
+        type: integer
+    type: object
+  caviar_internal_types.ProductFilter:
+    properties:
+      createdAfter:
+        type: string
+      createdBefore:
+        type: string
+      description:
+        type: string
+      includeVariants:
+        type: boolean
+      limit:
+        type: integer
+      name:
+        type: string
+      offset:
+        type: integer
+      search:
+        type: string
+      showAll:
+        type: boolean
+      slug:
+        type: string
+      sortBy:
+        type: string
+      sortOrder:
+        type: string
+      subtitle:
+        type: string
+      updatedAfter:
+        type: string
+      updatedBefore:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API for managing caviar products and orders
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Caviar API
+  version: "1.0"
+paths:
+  /api/v1/orders:
+    get:
+      description: Retrieve a list of orders with filtering and pagination
+      parameters:
+      - description: Filter by order status
+        in: query
+        name: status
+        type: string
+      - description: Filter by customer phone
+        in: query
+        name: customer_phone
+        type: string
+      - description: Filter by delivery country
+        in: query
+        name: country
+        type: string
+      - description: Filter by creation date from (RFC3339 format)
+        in: query
+        name: created_from
+        type: string
+      - description: Filter by creation date to (RFC3339 format)
+        in: query
+        name: created_to
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/caviar_internal_dto.OrderListResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List orders
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      description: Create a new order with customer and delivery information
+      parameters:
+      - description: Order creation data
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/caviar_internal_dto.OrderCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/caviar_internal_dto.OrderResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new order
+      tags:
+      - orders
+  /api/v1/orders/{id}:
+    delete:
+      description: Delete an order by ID
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete order
+      tags:
+      - orders
+    get:
+      description: Retrieve an order by its ID
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/caviar_internal_dto.OrderResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get order by ID
+      tags:
+      - orders
+  /api/v1/orders/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: Update the status of an existing order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Status update data
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/caviar_internal_dto.OrderStatusUpdateDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update order status
+      tags:
+      - orders
+  /api/v1/orders/number/{orderNumber}:
+    get:
+      description: Retrieve an order by its order number
+      parameters:
+      - description: Order Number
+        in: path
+        name: orderNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/caviar_internal_dto.OrderResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get order by order number
+      tags:
+      - orders
+  /api/v1/orders/regional:
+    post:
+      consumes:
+      - application/json
+      description: Create a new order with automatic validation based on country (Ukraine
+        or Europe)
+      parameters:
+      - description: Regional order data
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/caviar_internal_dto.RegionalOrderDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/caviar_internal_dto.OrderResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create regional order
+      tags:
+      - orders
+  /api/v1/orders/statistics:
+    get:
+      description: Get order statistics including counts by status and country
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get order statistics
+      tags:
+      - orders
+  /api/v1/products:
+    post:
+      consumes:
+      - application/json
+      description: Create a new product with variants and details
+      parameters:
+      - description: Product creation data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/caviar_internal_dto.ProductCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Created product
+          schema:
+            $ref: '#/definitions/caviar_internal_dto.ProductCreateDTO'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new product
+      tags:
+      - products
+  /api/v1/products/{id}:
+    delete:
+      description: Delete a product and all its variants
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Product not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a product
+      tags:
+      - products
+    put:
+      consumes:
+      - application/json
+      description: Update product details, variants, and other information
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Product update data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/caviar_internal_dto.ProductUpdateDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated product
+          schema:
+            $ref: '#/definitions/caviar_internal_dto.ProductUpdateDTO'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Product not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update an existing product
+      tags:
+      - products
+  /api/v1/products/search:
+    post:
+      consumes:
+      - application/json
+      description: Search and filter products with pagination
+      parameters:
+      - description: Product filter parameters
+        in: body
+        name: filter
+        schema:
+          $ref: '#/definitions/caviar_internal_types.ProductFilter'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of products
+          schema:
+            items:
+              $ref: '#/definitions/caviar_internal_dto.ProductResponseDTO'
+            type: array
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Search products
+      tags:
+      - products
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

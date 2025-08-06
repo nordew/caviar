@@ -56,3 +56,25 @@ type VariantUpdateDTO struct {
     Stock  int    `json:"stock,omitempty"`
     Prices map[string]MoneyDTO `json:"prices,omitempty"`
 }
+
+type ProductResponseDTO struct {
+    ID          string `json:"id"`
+    Slug        string `json:"slug"`
+    Name        string `json:"name"`
+    Subtitle    string `json:"subtitle"`
+    Description string `json:"description"`
+    Variants    []VariantResponseDTO `json:"variants"`
+    Details     CaviarDetailsDTO `json:"details"`
+    IsActive    bool `json:"is_active"`
+    CreatedAt   string `json:"created_at"`
+    UpdatedAt   string `json:"updated_at"`
+}
+
+type VariantResponseDTO struct {
+    ID        string `json:"id"`
+    Mass      int    `json:"mass"`
+    Stock     int    `json:"stock"`
+    Prices    map[string]MoneyDTO `json:"prices"`
+    CreatedAt string `json:"created_at"`
+    UpdatedAt string `json:"updated_at"`
+}

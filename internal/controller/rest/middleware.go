@@ -2,11 +2,11 @@ package rest
 
 import (
 	"fmt"
-	"net/http"
 
 	"caviar/pkg/apperror"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func (h *Handler) LoggerMiddleware() gin.HandlerFunc {
@@ -24,35 +24,31 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": gin.H{
-					"code":    "UNAUTHORIZED",
-					"message": "Authorization header is required",
-				},
-			})
+			h.handleError(c, apperror.New(apperror.CodeUnauthorized, "Authorization header is required"))
 			c.Abort()
 			return
 		}
 
 		if len(authHeader) < 7 || authHeader[:7] != "Bearer " {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": gin.H{
-					"code":    "UNAUTHORIZED",
-					"message": "Invalid authorization format. Use 'Bearer <token>'",
-				},
-			})
+			h.handleError(c, apperror.New(apperror.CodeUnauthorized, "Invalid authorization format. Use 'Bearer <token>'"))
 			c.Abort()
 			return
 		}
 
 		token := authHeader[7:]
+		
+		// Debug logging for development
+		if !h.isProd {
+			h.logger.Debug("Auth validation",
+				zap.String("provided_token", token),
+				zap.String("expected_secret", h.authSecret),
+				zap.Bool("tokens_match", token == h.authSecret),
+				zap.Int("provided_length", len(token)),
+				zap.Int("expected_length", len(h.authSecret)))
+		}
+		
 		if token != h.authSecret {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": gin.H{
-					"code":    "UNAUTHORIZED",
-					"message": "Invalid authorization token",
-				},
-			})
+			h.handleError(c, apperror.New(apperror.CodeUnauthorized, "Invalid authorization token"))
 			c.Abort()
 			return
 		}

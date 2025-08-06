@@ -2,6 +2,7 @@ package rest
 
 import (
 	"caviar/internal/dto"
+	"caviar/internal/models"
 	"caviar/internal/types"
 	"context"
 	"io"
@@ -14,6 +15,7 @@ func (h *Handler) initProductRoutes(r *gin.RouterGroup) {
 	products := r.Group("/products")
 	
 	products.POST("/search", h.listProducts)
+	products.GET("/:id", h.getProduct) // Get single product by ID
 
 	productsProtected := products.Group("/", h.AuthMiddleware())
 	productsProtected.POST("/", h.createProduct)
@@ -28,7 +30,7 @@ func (h *Handler) initProductRoutes(r *gin.RouterGroup) {
 // @Accept json
 // @Produce json
 // @Param filter body types.ProductFilter false "Product filter parameters"
-// @Success 200 {array} models.Product "List of products"
+// @Success 200 {array} dto.ProductResponseDTO "List of products"
 // @Failure 400 {object} map[string]interface{} "Bad request"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /api/v1/products/search [post]
@@ -50,7 +52,8 @@ func (h *Handler) listProducts(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, products)
+	response := h.converter.Product.ToResponseDTOs(products)
+	c.JSON(http.StatusOK, response)
 }
 
 // CreateProduct godoc
@@ -135,4 +138,49 @@ func (h *Handler) deleteProduct(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Product deleted successfully"})
+}
+
+// @Summary Get product by ID
+// @Description Get a single product by its ID
+// @Tags products
+// @Produce json
+// @Param id path string true "Product ID"
+// @Success 200 {object} dto.ProductResponseDTO "Product data"
+// @Failure 404 {object} map[string]interface{} "Product not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /api/v1/products/{id} [get]
+func (h *Handler) getProduct(c *gin.Context) {
+	id, ok := h.getPathParam(c, "id", true)
+	if !ok {
+		return
+	}
+
+	// We need to create a temporary method since the service doesn't have GetByID exposed
+	// For now, let's use a filter to get the product
+	filter := types.DefaultProductFilter()
+	filter.ShowAll = true
+	filter.Limit = 1
+	
+	products, err := h.productService.List(context.Background(), false, filter)
+	if err != nil {
+		h.handleError(c, err)
+		return
+	}
+	
+	// Find the product with matching ID
+	var foundProduct *models.Product
+	for _, product := range products {
+		if product.ID == id {
+			foundProduct = product
+			break
+		}
+	}
+	
+	if foundProduct == nil {
+		h.handleNotFound(c, "Product")
+		return
+	}
+
+	response := h.converter.Product.ToResponseDTO(foundProduct)
+	h.handleSuccess(c, http.StatusOK, response)
 }
